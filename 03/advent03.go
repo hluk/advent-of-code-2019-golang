@@ -2,18 +2,21 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"io/ioutil"
 	"math"
 	"strconv"
 	"strings"
 )
 
+type Point = image.Point
+
 type Wire struct {
-	data map[[2]int]int
+	data map[Point]int
 }
 
 func (w Wire) Get(x, y int) int {
-	v, ok := w.data[[2]int{x, y}]
+	v, ok := w.data[Point{x, y}]
 	if ok {
 		return v
 	}
@@ -21,7 +24,7 @@ func (w Wire) Get(x, y int) int {
 }
 
 func (w *Wire) Set(x, y, d int) {
-	xy := [2]int{x, y}
+	xy := Point{x, y}
 	v, ok := w.data[xy]
 	if ok {
 		d = Min(d, v)
@@ -29,11 +32,11 @@ func (w *Wire) Set(x, y, d int) {
 	w.data[xy] = d
 }
 
-func Crossings(w1, w2 Wire) [][2]int {
-	result := [][2]int{}
+func Crossings(w1, w2 Wire) []Point {
+	result := []Point{}
 	for k := range w1.data {
 		if _, ok := w2.data[k]; ok {
-			if k[0] == 0 && k[1] == 0 {
+			if k.X == 0 && k.Y == 0 {
 				continue
 			}
 			result = append(result, k)
@@ -56,8 +59,8 @@ func Min(a, b int) int {
 	return b
 }
 
-func Distance(c [2]int) int {
-	return Abs(c[0]) + Abs(c[1])
+func Distance(p Point) int {
+	return Abs(p.X) + Abs(p.Y)
 }
 
 func CrossingsShortestDistance(w1, w2 Wire) int {
@@ -73,7 +76,7 @@ func CrossingsShortestSignal(w1, w2 Wire) int {
 	result := math.MaxInt32
 	for k := range w1.data {
 		if v2, ok := w2.data[k]; ok {
-			if k[0] == 0 && k[1] == 0 {
+			if k.X == 0 && k.Y == 0 {
 				continue
 			}
 			result = Min(result, w1.data[k]+v2)
@@ -84,7 +87,7 @@ func CrossingsShortestSignal(w1, w2 Wire) int {
 
 func LoadWire(txt string) Wire {
 	w := Wire{}
-	w.data = make(map[[2]int]int)
+	w.data = make(map[Point]int)
 	dirs := strings.Split(txt, ",")
 	x, y, d := 0, 0, 0
 

@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func sortCoords(slice [][2]int) {
+func sortCoords(slice []Point) {
 	sort.Slice(slice, func(i, j int) bool {
 		a, b := slice[i], slice[j]
 		if a[0] == b[0] {
@@ -49,7 +49,7 @@ func TestCrossings(t *testing.T) {
 	w1 := LoadWire("R8,U5,L5,D3")
 	w2 := LoadWire("U7,R6,D4,L4")
 	got := Crossings(w1, w2)
-	expected := [][2]int{{6, 5}, {3, 3}}
+	expected := []Point{{6, 5}, {3, 3}}
 	sortCoords(got)
 	sortCoords(expected)
 	if !reflect.DeepEqual(got, expected) {
