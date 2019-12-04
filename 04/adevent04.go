@@ -2,32 +2,32 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 func main() {
-	a := 256310
-	b := 732736
-
-	count1 := 0
-	count2 := 0
-	for i := a; i <= b; i++ {
+	start, stop := 256310, 732736
+	count1, count2 := 0, 0
+	for i := start; i <= stop; i++ {
 		s := strconv.Itoa(i)
-		if s[0] <= s[1] && s[1] <= s[2] && s[2] <= s[3] && s[3] <= s[4] && s[4] <= s[5] {
-			if s[0] == s[1] || s[1] == s[2] || s[2] == s[3] || s[3] == s[4] || s[4] == s[5] {
-				count1++
-
-				m := make(map[rune]byte, 6)
-				for _, v := range s {
-					m[v]++
-				}
-				for k := range m {
-					if m[k] == 2 {
+		sorted := sort.SliceIsSorted(s, func(i, j int) bool { return s[i] < s[j] })
+		if sorted {
+			inc1 := 0
+			for i := 0; i < len(s)-1; {
+				j := strings.LastIndexByte(s, s[i])
+				if i != j {
+					inc1 = 1
+					if i+1 == j {
 						count2++
 						break
 					}
 				}
+				i = j + 1
 			}
+			count1 += inc1
+			continue
 		}
 	}
 	fmt.Println(count1, count2)
