@@ -12,19 +12,10 @@ import (
 
 type Pos = image.Point
 type MapData = map[Pos]struct{}
+type Hits = map[Pos][]Pos
 
 type Map struct {
 	Map MapData
-	W   int
-	H   int
-	D   []Pos
-}
-
-func Max(a, b int) int {
-	if a < b {
-		return b
-	}
-	return a
 }
 
 func Abs(a int) int {
@@ -44,17 +35,11 @@ func GCD(a, b int) int {
 }
 
 func CreateMap() Map {
-	return Map{MapData{}, 0, 0, []Pos{}}
+	return Map{MapData{}}
 }
 
 func (m *Map) Set(p Pos) {
-	m.W = Max(m.W, p.X+1)
-	m.H = Max(m.H, p.Y+1)
 	m.Map[p] = struct{}{}
-}
-
-func (m *Map) Unset(p Pos) {
-	delete(m.Map, p)
 }
 
 func (m Map) Get(p Pos) bool {
@@ -62,58 +47,11 @@ func (m Map) Get(p Pos) bool {
 	return ok
 }
 
-func (m Map) VisibleAsteroidInLOS(p0, pd Pos) Pos {
-	p := p0.Add(pd)
-	for ; 0 <= p.Y && p.Y < m.H && 0 <= p.X && p.X < m.W; p = p.Add(pd) {
-		if m.Get(p) {
-			return p
-		}
-	}
-	return p0
-}
-
 func Angle(p Pos) float64 {
 	rad := math.Atan2(float64(p.Y), float64(p.X))
 	deg := rad*(180/math.Pi) + 90
 	deg = math.Mod(deg+360, 360)
 	return deg
-}
-
-func (m Map) Deltas() []Pos {
-	ds := []Pos{}
-	for xd := -m.W + 1; xd < m.W; xd++ {
-		for yd := -m.H + 1; yd < m.H; yd++ {
-			gcd := GCD(xd, yd)
-			if Abs(gcd) != 1 || gcd == 0 {
-				continue
-			}
-			ds = append(ds, Pos{xd, yd})
-		}
-	}
-	sort.Slice(ds, func(i, j int) bool {
-		return Angle(ds[i]) < Angle(ds[j])
-	})
-	return ds
-}
-
-func (m Map) Asteroids(p0 Pos, ch chan Pos) {
-	for _, d := range m.D {
-		p := m.VisibleAsteroidInLOS(p0, d)
-		if p != p0 {
-			ch <- p
-		}
-	}
-	close(ch)
-}
-
-func (m Map) VisibleAsteroids(p0 Pos) int {
-	ch := make(chan Pos)
-	go m.Asteroids(p0, ch)
-	count := 0
-	for range ch {
-		count++
-	}
-	return count
 }
 
 func LoadMap(path string) Map {
@@ -134,32 +72,67 @@ func LoadMap(path string) Map {
 			}
 		}
 	}
-	m.D = m.Deltas()
 	return m
+}
+
+func (m *Map) Hits(p0 Pos) Hits {
+	hits := Hits{}
+	for p := range m.Map {
+		d := p.Sub(p0)
+		scale := Abs(GCD(d.X, d.Y))
+		if scale == 0 {
+			continue
+		}
+		d = Pos{d.X / scale, d.Y / scale}
+		hits[d] = append(hits[d], p)
+	}
+	return hits
+}
+
+func Distance(p0, p1 Pos) int {
+	d := p1.Sub(p0)
+	return Abs(d.X) + Abs(d.Y)
+}
+
+func HitAt(hits Hits, p0 Pos, count int) Pos {
+	ds := []Pos{}
+	for d := range hits {
+		ds = append(ds, d)
+	}
+	sort.Slice(ds, func(i, j int) bool {
+		return Angle(ds[i]) < Angle(ds[j])
+	})
+
+	for i := 0; ; i++ {
+		for _, d := range ds {
+			ps := hits[d]
+			if i < len(ps) {
+				count--
+				if count == 0 {
+					sort.Slice(ps, func(i, j int) bool {
+						return Distance(p0, ps[i]) < Distance(p0, ps[j])
+					})
+					return ps[i]
+				}
+			}
+		}
+	}
 }
 
 func main() {
 	m := LoadMap("advent10.txt")
-	visibleMax := 0
+
+	hitsMax := Hits{}
 	pMax := Pos{0, 0}
 	for p := range m.Map {
-		visible := m.VisibleAsteroids(p)
-		if visibleMax < visible {
-			visibleMax = visible
+		hits := m.Hits(p)
+		if len(hitsMax) < len(hits) {
+			hitsMax = hits
 			pMax = p
 		}
 	}
-	fmt.Println(pMax, visibleMax)
+	fmt.Println(pMax, len(hitsMax))
 
-	ch := make(chan Pos)
-	count := 0
-	go m.Asteroids(pMax, ch)
-	for p := range ch {
-		count++
-		if count == 200 {
-			fmt.Println(p, p.X*100+p.Y)
-			break
-		}
-		m.Unset(p)
-	}
+	p := HitAt(hitsMax, pMax, 200)
+	fmt.Println(p.X*100 + p.Y)
 }

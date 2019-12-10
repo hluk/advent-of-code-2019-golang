@@ -42,12 +42,6 @@ func TestAngle(t *testing.T) {
 
 func TestLoadMap(t *testing.T) {
 	m := LoadMap("advent10_test1.txt")
-	if m.W != 5 {
-		t.Errorf("FAILED")
-	}
-	if m.H != 5 {
-		t.Errorf("FAILED")
-	}
 	if m.Get(Pos{0, 0}) {
 		t.Errorf("FAILED")
 	}
@@ -59,23 +53,40 @@ func TestLoadMap(t *testing.T) {
 	}
 }
 
-func TestVisibleAsteroidInLOS(t *testing.T) {
+func TestHits(t *testing.T) {
 	m := LoadMap("advent10_test1.txt")
-	p := m.VisibleAsteroidInLOS(Pos{1, 0}, Pos{1, 0})
-	expected := Pos{4, 0}
-	if p != expected {
+
+	v := m.Hits(Pos{1, 0})
+	if len(v) != 7 {
+		t.Errorf("FAILED")
+	}
+
+	v = m.Hits(Pos{3, 4})
+	if len(v) != 8 {
 		t.Errorf("FAILED")
 	}
 }
 
-func TestVisibleAsteroids(t *testing.T) {
+func TestHitAt(t *testing.T) {
 	m := LoadMap("advent10_test1.txt")
-	v := m.VisibleAsteroids(Pos{1, 0})
-	if v != 7 {
+	p0 := Pos{1, 0}
+	hits := m.Hits(p0)
+
+	p := HitAt(hits, p0, 1)
+	expected := Pos{4, 0}
+	if p != expected {
 		t.Errorf("FAILED")
 	}
-	v = m.VisibleAsteroids(Pos{3, 4})
-	if v != 8 {
+
+	p = HitAt(hits, p0, 2)
+	expected = Pos{4, 2}
+	if p != expected {
+		t.Errorf("FAILED")
+	}
+
+	p = HitAt(hits, p0, 3)
+	expected = Pos{3, 2}
+	if p != expected {
 		t.Errorf("FAILED")
 	}
 }
