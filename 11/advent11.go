@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+
+	"github.com/hluk/advent-of-code-2019-golang"
 )
 
 type Pos = image.Point
@@ -24,13 +26,6 @@ type Op struct {
 
 type Memory struct {
 	Data map[Value]Value
-}
-
-func Min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }
 
 func Max(a, b int) int {
@@ -254,10 +249,10 @@ func Part2(r []Value) {
 	minX, maxX := 0, 0
 	minY, maxY := 0, 0
 	for p := range panels {
-		minX = Min(minX, p.X)
-		maxX = Max(maxX, p.X)
-		minY = Min(minY, p.Y)
-		maxY = Max(maxY, p.Y)
+		minX = adv.Min(minX, p.X)
+		maxX = adv.Max(maxX, p.X)
+		minY = adv.Min(minY, p.Y)
+		maxY = adv.Max(maxY, p.Y)
 	}
 
 	for y := minY; y <= maxY; y++ {
