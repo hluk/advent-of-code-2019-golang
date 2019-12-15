@@ -186,37 +186,33 @@ func runDroid(r []Value) (Area, Pos) {
 }
 
 func exploreArea(area Area, pos Pos, visit func(Pos, int) bool) {
-	ps := []Pos{pos}
-	ms := []int{0}
+	type QueueItem struct {
+		pos      Pos
+		distance int
+	}
+	queue := []QueueItem{{pos, 0}}
 
-	for len(ps) != 0 {
-		pos := ps[0]
-		ps = ps[1:]
+	for len(queue) != 0 {
+		q := queue[0]
+		queue = queue[1:]
 
-		m := ms[0]
-		ms = ms[1:]
-
-		if area[pos] != '.' {
+		if area[q.pos] != '.' {
 			continue
 		}
 
-		area[pos] = AreaOxygen
-		if !visit(pos, m) {
+		area[q.pos] = AreaOxygen
+		if !visit(q.pos, q.distance) {
 			break
 		}
 
-		d := Pos{0, -1}
-		ps = append(ps, pos.Add(d))
-		d = next(d)
-		ps = append(ps, pos.Add(d))
-		d = next(d)
-		ps = append(ps, pos.Add(d))
-		d = next(d)
-		ps = append(ps, pos.Add(d))
-		ms = append(ms, m+1)
-		ms = append(ms, m+1)
-		ms = append(ms, m+1)
-		ms = append(ms, m+1)
+		d := q.distance + 1
+		queue = append(
+			queue,
+			QueueItem{q.pos.Add(Pos{0, -1}), d},
+			QueueItem{q.pos.Add(Pos{1, 0}), d},
+			QueueItem{q.pos.Add(Pos{0, 1}), d},
+			QueueItem{q.pos.Add(Pos{-1, 0}), d},
+		)
 	}
 }
 
