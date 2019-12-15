@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"image"
+	"os"
+	"strconv"
 
 	"github.com/hluk/advent-of-code-2019-golang"
 	"github.com/hluk/advent-of-code-2019-golang/intcode"
@@ -68,6 +70,16 @@ func next(d Pos) Pos {
 
 func printAreaNear(a Area, pos0 Pos, x byte, wall Pos) {
 	limit := Pos{50, 32}
+
+	cols := os.Getenv("X")
+	rows := os.Getenv("Y")
+	limitX, err1 := strconv.Atoi(cols)
+	limitY, err2 := strconv.Atoi(rows)
+	if limitX > 0 && err1 == nil && limitY > 0 && err2 == nil {
+		limit.X = limitX / 2
+		limit.Y = limitY / 2
+	}
+
 	pos := pos0.Sub(limit)
 	max := pos0.Add(limit)
 	for ; pos.Y < max.Y; pos.Y++ {
