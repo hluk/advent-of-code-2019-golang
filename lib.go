@@ -4,7 +4,7 @@ import "testing"
 
 func AssertEq(actual, expected interface{}, t *testing.T) {
 	if actual != expected {
-		t.Errorf("Expected: %v; Actual: %v", actual, expected)
+		t.Errorf("Expected: %v; Actual: %v", expected, actual)
 	}
 }
 
