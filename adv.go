@@ -7,7 +7,7 @@ import (
 
 func AssertEq(actual, expected interface{}, t *testing.T) {
 	if !reflect.DeepEqual(actual, expected) {
-		t.Errorf("Expected: %v; Actual: %v", expected, actual)
+		t.Errorf("Actual: %v; Expected: %v", actual, expected)
 	}
 }
 
