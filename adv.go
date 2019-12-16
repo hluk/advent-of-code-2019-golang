@@ -1,9 +1,12 @@
 package adv
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func AssertEq(actual, expected interface{}, t *testing.T) {
-	if actual != expected {
+	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Expected: %v; Actual: %v", expected, actual)
 	}
 }
