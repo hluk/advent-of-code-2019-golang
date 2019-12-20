@@ -16,15 +16,6 @@ func Pull(r []intcode.Value, x, y int) bool {
 	return pull == 1
 }
 
-func Fits(r []intcode.Value, s, x, y int) bool {
-	xy := Pull(r, x, y)
-	x0 := Pull(r, x+s-1, y)
-	x1 := Pull(r, x+s, y)
-	y0 := Pull(r, x, y+s-1)
-	y1 := Pull(r, x, y+s)
-	return xy && x0 && y0 && !x1 && !y1
-}
-
 func main() {
 	r := intcode.LoadRegisters("advent19.txt")
 
@@ -44,6 +35,7 @@ func main() {
 	y := y0
 	s := 100
 	for {
+		x1, y1 := x, y
 		for !Pull(r, x, y) {
 			x++
 		}
@@ -64,7 +56,7 @@ func main() {
 			y++
 		}
 
-		if Fits(r, s, x, y) {
+		if x == x1 && y == y1 {
 			break
 		}
 	}
