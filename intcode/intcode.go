@@ -75,6 +75,10 @@ func (op *Op) Load2(ip Value, addrBase Value, m Memory) Value {
 }
 
 func Run(r []Value, chIn, chOut chan Value) {
+	RunWithRead(r, chIn, chOut, nil)
+}
+
+func RunWithRead(r []Value, chIn, chOut, chRead chan Value) {
 	var ip Value
 	var addrBase Value
 	m := CreateMemory(r)
@@ -94,6 +98,9 @@ func Run(r []Value, chIn, chOut chan Value) {
 
 		case 3:
 			a := m.Get(ip + 1)
+			if chRead != nil {
+				chRead <- 1
+			}
 			m.Set(a, <-chIn, op.Mode1, addrBase)
 			ip += 2
 
